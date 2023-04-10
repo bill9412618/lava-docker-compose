@@ -10,15 +10,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  squid:
-    image: datadog/squid
-    container_name: lava_squid
-    volumes:
-      - squid:/var/spool/squid
-      - ./squid/squid.conf:/etc/squid/squid.conf
-    ports:
-      - 3128:3128
-
   server:
     image: lavasoftware/lava-server:2019.12
 
@@ -65,9 +56,6 @@ volumes:
   pgdata:
     name: lava-server-pgdata
 
-  # squid cache volume
-  squid:
-    name: lava-squid-cache
 
   # lava-server job artifact volume
   joboutput:
