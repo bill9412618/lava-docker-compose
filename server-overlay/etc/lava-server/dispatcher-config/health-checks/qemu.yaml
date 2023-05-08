@@ -1,58 +1,49 @@
+# Standard Stretch amd64 JOB definition for QEMU
 device_type: qemu
+job_name: qemu amd64 standard build, Debian Stretch
 
-job_name: qemu-armv7-health
 timeouts:
   job:
     minutes: 10
   action:
-   minutes: 10
-  actions:
-    power-off:
-      seconds: 30
+    minutes: 2
+  connection:
+    minutes: 2
 priority: medium
 visibility: public
 
-context:
-  arch: arm
-  cpu: cortex-a15
-  guestfs_interface: virtio
+metadata:
+  source: https://git.lavasoftware.org/lava/lava
+  path: doc/v2/examples/test-jobs/qemu-amd64-standard-stretch.yaml
 
+# CONTEXT_BLOCK
+context:
+  arch: amd64
+  # comment out or change to user if the dispatcher does not support bridging.
+  netdevice: tap
+
+# ACTIONS_BLOCK
 actions:
+# DEPLOY_BLOCK
 - deploy:
     timeout:
-      minutes: 3
+      minutes: 4
     to: tmpfs
-    os: oe
     images:
-      kernel:
-        image_arg: '-kernel {kernel} -append "console=ttyAMA0,115200 root=/dev/ram0 debug verbose"'
-        url: https://downloads.openwrt.org/releases/18.06.1/targets/armvirt/32/openwrt-18.06.1-armvirt-32-zImage
-        #sha256sum: ac04608b6fb548eb6eb97509e376aa4f7c7d74a22a4c14c4f1e6b46b2dcbfbd7
-      ramdisk:
-        image_arg: '-initrd {ramdisk}'
-        url: https://downloads.openwrt.org/releases/18.06.1/targets/armvirt/32/openwrt-18.06.1-armvirt-32-rootfs.cpio.gz
-        #sha256sum: 0a63d3a669cff57dca9eb5d45f476485ee46b9443ca2078feb860b7e90aeeb38
+        rootfs:
+          image_arg: -drive format=raw,file={rootfs}
+          url: https://images.validation.linaro.org/kvm/standard/stretch-2.img.gz
+          sha256sum: b5cdb3b9e65fec2d3654a05dcdf507281f408b624535b33375170d1e852b982c
+          compression: gz
 
+# BOOT_BLOCK
 - boot:
-    timeout:
-      minutes: 5
     method: qemu
     media: tmpfs
-    prompts:
-      - '/ #'
-
-- test:
     timeout:
-      minutes: 10
-    definitions:
-    - repository:
-        metadata:
-          format: Lava-Test Test Definition 1.0
-          name: smoke-tests-basic
-          description: "Basic system test command for Linaro Ubuntu images"
-        run:
-          steps:
-          - printenv
-      from: inline
-      name: env-dut-inline
-      path: inline/env-dut.yaml
+      minutes: 2
+    prompts:
+    - "root@debian:"
+    auto_login:
+      login_prompt: "login:"
+      username: root
